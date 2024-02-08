@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>서비스1</title>
+    <script src="http://localhost:8080/js/keycloak.js"></script>
+    <script>
+        var keycloak = new Keycloak({
+            authServerUrl: 'http://localhost:8080/',
+            realm: 'inswave-saas',
+            clientId: 'account-console'
+        });
+
+        var token = '';
+
+        keycloak.init({onLoad: 'check-sso', pkceMethod: 'S256', promiseType: 'native'}).then((authenticated) => {
+            isReactLoading = true;
+            token = keycloak.token;
+        }).catch(() => {
+            alert('failed to initialize keycloak');
+        });
+
+        function getToken(){
+            $("#token").html(token);
+        }
+
+        function getTokenDirect(){
+
+            var postData = {
+                client_id: 'service1-cli',
+                client_secret: '96ui2b4lkYybez03KUkneYIILphiIMGx',
+                grant_type: 'password',
+                username: 'user1',
+                password: 'user1',
+            };
+
+            $.ajax({
+                url: 'http://localhost:8080/realms/inswave-saas/protocol/openid-connect/token',
+                method: 'POST',
+                data: postData,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                success: function(data){
+                    $("#direct_token").html(data.access_token);
+                }
+            });
+        }
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>서비스1</h1>
+
+프론트 페이지<br/>
+<button tabindex="0"  onclick="keycloak.login()" class="pf-c-button pf-m-primary" type="button">로그인</button>
+<button tabindex="0"  onclick="getToken()" class="pf-c-button pf-m-primary" type="button">토큰 출력</button>
+<span id="token"></span>
+<br/><br/>
+
+
+API 연동<br/>
+<button tabindex="0"  onclick="getTokenDirect()" class="pf-c-button pf-m-primary" type="button">토큰 발행</button>
+<span id="direct_token"></span>
+</body>
+</html>
